@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>NBA Teams Matching Game</title>
+   <style>
+       body {
+           font-family: Arial, sans-serif;
+           background-color: #f4f4f4;
+           display: flex;
+           justify-content: center;
+           align-items: center;
+           height: 100vh;
+           margin: 0;
+       }
+
+
+       .game-container {
+           text-align: center;
+           background-color: #fff;
+           padding: 20px;
+           border-radius: 10px;
+           box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+       }
+
+
+       h1 {
+           margin-bottom: 20px;
+           color: #333;
+       }
+
+
+       #timer {
+           font-size: 1.5em;
+           margin-bottom: 20px;
+           font-weight: bold;
+       }
+
+
+       .board {
+           display: grid;
+           grid-template-columns: repeat(4, 150px);
+           grid-gap: 10px;
+           justify-content: center;
+       }
+
+
+       .card {
+           width: 150px;
+           height: 150px;
+           background-color: #1c1c1c;
+           color: transparent;
+           display: flex;
+           justify-content: center;
+           align-items: center;
+           border-radius: 10px;
+           cursor: pointer;
+           font-size: 1.2em;
+           font-weight: bold;
+           color: #fff;
+           position: relative;
+           transition: background-color 0.3s;
+       }
+
+
+       .card.flipped {
+           background-color: #ff5733;
+           color: #fff;
+       }
+
+
+       .card.matched {
+           background-color: #28a745;
+           color: #fff;
+       }
+
+
+       .card:active {
+           transform: scale(0.95);
+       }
+
+
+       .reset-button {
+           padding: 10px 20px;
+           font-size: 1.2em;
+           background-color: #007bff;
+           color: white;
+           border: none;
+           border-radius: 5px;
+           cursor: pointer;
+           margin-top: 20px;
+       }
+
+
+       .reset-button:hover {
+           background-color: #0056b3;
+       }
+   </style>
+</head>
+<body>
+
+
+   <div class="game-container">
+       <h1>NBA Teams Matching Game</h1>
+       <div id="timer">Time: 0s</div>
+       <div class="board" id="board"></div>
+       <button class="reset-button" onclick="startGame()">Start New Game</button>
+   </div>
+
+
+   <script>
+       const teams = [
+           "Los Angeles Lakers", "Golden State Warriors",
+           "Chicago Bulls", "Miami Heat",
+           "Brooklyn Nets", "Boston Celtics",
+           "Dallas Mavericks", "Philadelphia 76ers",
+           "Los Angeles Lakers", "Golden State Warriors",
+           "Chicago Bulls", "Miami Heat",
+           "Brooklyn Nets", "Boston Celtics",
+           "Dallas Mavericks", "Philadelphia 76ers"
+       ];
+
+
+       let flippedCards = [];
+       let matchedCards = [];
+       let gameBoard = document.getElementById('board');
+       let timerDisplay = document.getElementById('timer');
+       let timerInterval;
+       let gameTime = 0;
+
+
+       function startGame() {
+           gameBoard.innerHTML = '';
+           flippedCards = [];
+           matchedCards = [];
+           gameTime = 0;
+           clearInterval(timerInterval);
+
+
+           // Shuffle the cards
+           let shuffledTeams = shuffle(teams.slice());
+
+
+           // Create cards on the board
+           shuffledTeams.forEach(team => {
+               let card = document.createElement('div');
+               card.classList.add('card');
+               card.setAttribute('data-team', team);
+               card.addEventListener('click', flipCard);
+               gameBoard.appendChild(card);
+           });
+
+
+           // Reset timer
+           timerDisplay.textContent = 'Time: 0s';
+           timerInterval = setInterval(updateTimer, 1000);
+       }
+
+
+       function shuffle(arr) {
+           for (let i = arr.length - 1; i > 0; i--) {
+               const j = Math.floor(Math.random() * (i + 1));
+               [arr[i], arr[j]] = [arr[j], arr[i]];
+           }
+           return arr;
+       }
+
+
+       function flipCard() {
+           if (flippedCards.length < 2 && !this.classList.contains('flipped') && !this.classList.contains('matched')) {
+               this.classList.add('flipped');
+               this.textContent = this.getAttribute('data-team');
+               flippedCards.push(this);
+
+
+               if (flippedCards.length === 2) {
+                   checkForMatch();
+               }
+           }
+       }
+
+
+       function checkForMatch() {
+           const [firstCard, secondCard] = flippedCards;
+
+
+           if (firstCard.getAttribute('data-team') === secondCard.getAttribute('data-team')) {
+               firstCard.classList.add('matched');
+               secondCard.classList.add('matched');
+               matchedCards.push(firstCard, secondCard);
+               flippedCards = [];
+               if (matchedCards.length === teams.length) {
+                   clearInterval(timerInterval);
+                   alert(`Congratulations! You completed the game in ${gameTime} seconds.`);
+               }
+           } else {
+               setTimeout(() => {
+                   firstCard.classList.remove('flipped');
+                   secondCard.classList.remove('flipped');
+                   firstCard.textContent = '';
+                   secondCard.textContent = '';
+                   flippedCards = [];
+               }, 1000);
+           }
+       }
+
+
+       function updateTimer() {
+           gameTime++;
+           timerDisplay.textContent = `Time: ${gameTime}s`;
+       }
+
+
+       // Start the game automatically when the page loads
+       startGame();
+   </script>
+
+
+</body>
+</html>
